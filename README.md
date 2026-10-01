@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/COM1919/MiauRedstoneMusic/main/assets/miauredstonemusic-logo.svg" alt="MiauRedstoneMusic logo" width="160" />
+<img src="https://raw.githubusercontent.com/omninbs/MiauRedstoneMusic/main/assets/miauredstonemusic-logo.svg" alt="MiauRedstoneMusic logo" width="160" />
 
 <h1>MiauRedstoneMusic</h1>
 
@@ -135,7 +135,7 @@ MiauRedstoneMusic can arrange each group with a different footprint, so the reds
 **1 · Clone or download the repository**
 
 ```powershell
-git clone https://github.com/COM1919/MiauRedstoneMusic.git
+git clone https://github.com/omninbs/MiauRedstoneMusic.git
 cd MiauRedstoneMusic
 ```
 

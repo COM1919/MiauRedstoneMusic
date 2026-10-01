@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/COM1919/MiauRedstoneMusic/main/assets/miauredstonemusic-logo.svg" alt="MiauRedstoneMusic Logo" width="160" />
+<img src="https://raw.githubusercontent.com/omninbs/MiauRedstoneMusic/main/assets/miauredstonemusic-logo.svg" alt="MiauRedstoneMusic Logo" width="160" />
 
 <h1>MiauRedstoneMusic</h1>
 
@@ -135,7 +135,7 @@ MiauRedstoneMusic 可以为每个分组设置不同的排布形态，让红石�
 **1 · 克隆或下载仓库**
 
 ```powershell
-git clone https://github.com/COM1919/MiauRedstoneMusic.git
+git clone https://github.com/omninbs/MiauRedstoneMusic.git
 cd MiauRedstoneMusic
 ```
 
