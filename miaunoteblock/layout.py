@@ -319,7 +319,7 @@ def compute_offsets(
                 pos_dict[gid] = (0, 0)
         else:
             angles = [math.pi * i / (n - 1) for i in range(n)] if n > 1 else [0]
-            point_list = [(round(radius * math.cos(a)), round(radius * math.sin(a))) for a in angles]
+            point_list = [(round(-radius * math.sin(a)), round(radius * math.cos(a))) for a in angles]
             if has_master:
                 pos_dict[master] = (0, 0)
                 idx = 0
