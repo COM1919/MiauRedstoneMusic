@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/your-org/MiauRedstoneMusic/main/assets/miaunoteblock-logo.svg" alt="MiauNoteBlock logo" width="160" />
+<img src="https://raw.githubusercontent.com/COM1919/MiauRedstoneMusic/main/assets/miauredstonemusic-logo.svg" alt="MiauRedstoneMusic logo" width="160" />
 
 <h1>MiauRedstoneMusic</h1>
 
@@ -8,8 +8,7 @@
 <p>Interactive Python generator that converts <code>.nbs</code> files into <code>.schem</code> note-block structures for Minecraft Java 1.21.11.</p>
 
 <p>
-  <a href="Readme_CN.md"><b>中文文档</b></a> &nbsp;&nbsp;|&nbsp;&nbsp;
-  <a href="mpe_docs.md"><b>Lyric Mod Docs</b></a>
+  <a href="Readme_CN.md"><b>中文文档</b></a>
 </p>
 
 <p>
@@ -24,8 +23,6 @@
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square" alt="PRs welcome" />
   <img src="https://img.shields.io/badge/AI--assisted-~70%25-8A63D2?style=flat-square" alt="AI-assisted" />
 </p>
-
-<sub>Repository brand <b>MiauRedstoneMusic</b> &nbsp;·&nbsp; Product name <b>MiauNoteBlock</b></sub>
 
 </div>
 
@@ -53,9 +50,11 @@
 
 ## Overview
 
-**MiauNoteBlock** is an interactive Python utility in the **MiauRedstoneMusic** repository. It reads `.nbs` music files, converts their note and instrument data into Minecraft redstone note-block chains, and saves the result as a `.schem` structure file for Minecraft Java Edition.
+**MiauRedstoneMusic** is an interactive Python utility that reads `.nbs` music files, converts their note and instrument data into Minecraft redstone note-block chains, and saves the result as a `.schem` structure file for Minecraft Java Edition.
 
 It is built around the Minecraft Java **1.21.11** workflow and can optionally generate a synchronized **lyric command-block track** powered by the MiauParticleEffects Fabric mod.
+
+For source songs, the online NBS site [webnbs.com](https://webnbs.com) can be used. This repository does not claim that the online service runs the same conversion pipeline as this local tool.
 
 ---
 
@@ -93,7 +92,7 @@ It is built around the Minecraft Java **1.21.11** workflow and can optionally ge
 
 ## Layouts
 
-MiauNoteBlock can arrange each group with a different footprint, so the redstone structure matches the shape of your song instead of a single long line.
+MiauRedstoneMusic can arrange each group with a different footprint, so the redstone structure matches the shape of your song instead of a single long line.
 
 | Layout | Description |
 | :-- | :-- |
@@ -136,7 +135,7 @@ MiauNoteBlock can arrange each group with a different footprint, so the redstone
 **1 · Clone or download the repository**
 
 ```powershell
-git clone https://github.com/your-org/MiauRedstoneMusic.git
+git clone https://github.com/COM1919/MiauRedstoneMusic.git
 cd MiauRedstoneMusic
 ```
 
@@ -221,9 +220,10 @@ MiauParticleEffects provides the `/mpe text` entry point and renders the text as
 | :-- | :-- |
 | `miau_redstone_music.py` | Interactive entry point. |
 | `pm.bat` | Windows launcher for the entry point. |
-| `miaunoteblock/` | Main package. `app.py` holds the interactive flow and `main()`; `constants.py`, `config.py`, `lyrics.py`, `instruments.py`, `layout.py`, and `generation.py` hold reusable logic. |
+| `miaunoteblock/` | Python package holding the generator logic. `app.py` contains the interactive flow and `main()`; `constants.py`, `config.py`, `lyrics.py`, `instruments.py`, `layout.py`, and `generation.py` hold the reusable modules. |
 | `mpe_docs.md` | MiauParticleEffects command and environment notes. |
 | `Readme_CN.md` | Chinese documentation. |
+| `LICENSE` | Apache License 2.0. |
 
 ---
 

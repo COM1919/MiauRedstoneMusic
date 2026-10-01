@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/your-org/MiauRedstoneMusic/main/assets/miaunoteblock-logo.svg" alt="MiauNoteBlock Logo" width="160" />
+<img src="https://raw.githubusercontent.com/COM1919/MiauRedstoneMusic/main/assets/miauredstonemusic-logo.svg" alt="MiauRedstoneMusic Logo" width="160" />
 
 <h1>MiauRedstoneMusic</h1>
 
@@ -8,8 +8,7 @@
 <p>交互式 Python 生成器，将 <code>.nbs</code> 文件转换为适用于 Minecraft Java 1.21.11 的 <code>.schem</code> 音符盒结构。</p>
 
 <p>
-  <a href="README.md"><b>English README</b></a> &nbsp;&nbsp;|&nbsp;&nbsp;
-  <a href="mpe_docs.md"><b>歌词模组文档</b></a>
+  <a href="README.md"><b>English README</b></a>
 </p>
 
 <p>
@@ -24,8 +23,6 @@
   <img src="https://img.shields.io/badge/PR-欢迎-brightgreen?style=flat-square" alt="欢迎 PR" />
   <img src="https://img.shields.io/badge/AI%20协助-约%2070%25-8A63D2?style=flat-square" alt="AI 协助" />
 </p>
-
-<sub>仓库品牌 <b>MiauRedstoneMusic</b> &nbsp;·&nbsp; 产品名称 <b>MiauNoteBlock</b></sub>
 
 </div>
 
@@ -53,9 +50,11 @@
 
 ## 项目简介
 
-**MiauNoteBlock** 是 **MiauRedstoneMusic** 仓库中的交互式 Python 工具。它读取 `.nbs` 音乐文件，将其中的音符与乐器数据转换为 Minecraft 红石音符盒链，并保存为 `.schem` 结构文件，供 Minecraft Java Edition 使用。
+**MiauRedstoneMusic** 是一个交互式 Python 工具。它读取 `.nbs` 音乐文件，将其中的音符与乐器数据转换为 Minecraft 红石音符盒链，并保存为 `.schem` 结构文件，供 Minecraft Java Edition 使用。
 
 生成器围绕 Minecraft Java **1.21.11** 工作流设计，并可选生成与 **MiauParticleEffects** Fabric 模组同步的**歌词命令方块轨道**。
+
+源歌曲可使用在线 NBS 站点 [webnbs.com](https://webnbs.com)。本仓库不声明该在线服务与本地工具使用相同的转换流程。
 
 ---
 
@@ -93,7 +92,7 @@
 
 ## 排版布局
 
-MiauNoteBlock 可以为每个分组设置不同的排布形态，让红石结构贴合歌曲本身，而不是排成一条长线。
+MiauRedstoneMusic 可以为每个分组设置不同的排布形态，让红石结构贴合歌曲本身，而不是排成一条长线。
 
 | 排版 | 说明 |
 | :-- | :-- |
@@ -136,7 +135,7 @@ MiauNoteBlock 可以为每个分组设置不同的排布形态，让红石结构
 **1 · 克隆或下载仓库**
 
 ```powershell
-git clone https://github.com/your-org/MiauRedstoneMusic.git
+git clone https://github.com/COM1919/MiauRedstoneMusic.git
 cd MiauRedstoneMusic
 ```
 
@@ -221,9 +220,10 @@ MiauParticleEffects 提供 `/mpe text` 入口，并将文字渲染为基于粒�
 | :-- | :-- |
 | `miau_redstone_music.py` | 交互式入口。 |
 | `pm.bat` | 用于启动入口的 Windows 脚本。 |
-| `miaunoteblock/` | 主包。`app.py` 包含交互流程与入口 `main()`；`constants.py`、`config.py`、`lyrics.py`、`instruments.py`、`layout.py`、`generation.py` 存放可复用逻辑。 |
+| `miaunoteblock/` | 存放生成器逻辑的 Python 包。`app.py` 包含交互流程与入口 `main()`；`constants.py`、`config.py`、`lyrics.py`、`instruments.py`、`layout.py`、`generation.py` 为可复用模块。 |
 | `mpe_docs.md` | MiauParticleEffects 的命令与环境说明。 |
 | `README.md` | 英文文档。 |
+| `LICENSE` | Apache License 2.0。 |
 
 ---
 
