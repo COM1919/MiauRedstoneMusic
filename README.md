@@ -2,13 +2,12 @@
 
 <img src="https://raw.githubusercontent.com/your-org/MiauRedstoneMusic/main/assets/miaunoteblock-logo.svg" alt="MiauNoteBlock logo" width="160" />
 
-<h1>MiauNoteBlock</h1>
+<h1>MiauRedstoneMusic</h1>
 
-<p><b>Turn Note Block Studio songs into playable Minecraft redstone music.</b></p>
+<p><b>Turn NBS songs into playable Minecraft redstone music.</b></p>
 <p>Interactive Python generator that converts <code>.nbs</code> files into <code>.schem</code> note-block structures for Minecraft Java 1.21.11.</p>
 
 <p>
-  <a href="https://webnbs.com"><b>Online NBS &nbsp;›</b></a> &nbsp;&nbsp;|&nbsp;&nbsp;
   <a href="Readme_CN.md"><b>中文文档</b></a> &nbsp;&nbsp;|&nbsp;&nbsp;
   <a href="mpe_docs.md"><b>Lyric Mod Docs</b></a>
 </p>

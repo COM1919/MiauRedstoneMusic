@@ -2,13 +2,12 @@
 
 <img src="https://raw.githubusercontent.com/your-org/MiauRedstoneMusic/main/assets/miaunoteblock-logo.svg" alt="MiauNoteBlock Logo" width="160" />
 
-<h1>MiauNoteBlock</h1>
+<h1>MiauRedstoneMusic</h1>
 
-<p><b>把 Note Block Studio 音乐转换为可运行的 Minecraft 红石音乐。</b></p>
+<p><b>把 NBS 音乐转换为可运行的 Minecraft 红石音乐。</b></p>
 <p>交互式 Python 生成器，将 <code>.nbs</code> 文件转换为适用于 Minecraft Java 1.21.11 的 <code>.schem</code> 音符盒结构。</p>
 
 <p>
-  <a href="https://webnbs.com"><b>在线访问 NBS &nbsp;›</b></a> &nbsp;&nbsp;|&nbsp;&nbsp;
   <a href="README.md"><b>English README</b></a> &nbsp;&nbsp;|&nbsp;&nbsp;
   <a href="mpe_docs.md"><b>歌词模组文档</b></a>
 </p>
