@@ -27,8 +27,10 @@ DEFAULT_CONFIG = {
     "lyrics_duration": 20,
     "lyrics_enter": 5,
     "lyrics_exit": 5,
-    "lyrics_y_offset": 5,
-    "lyrics_side_offset": None
+    "lyrics_y_offset": 5,        # 歌词文字相对主轨道的高度（方块）
+    "lyrics_side_offset": None,  # 歌词文字额外的侧向偏移
+    "lyrics_follow": True,       # 文字是否随命令方块沿链条向前移动
+    "lyrics_import": {}          # 导入的歌词：{"tick": {"text": ..., "duration": ...}}
 }
 
 def load_config() -> dict:

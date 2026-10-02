@@ -1,0 +1,23 @@
+{
+  "type": "noteblock-web-lyrics",
+  "formatVersion": 1,
+  "tempo": 13,
+  "lyrics": {
+    "234": {
+      "text": "sddfa sdf ",
+      "duration": 14
+    },
+    "247": {
+      "text": "asddf",
+      "duration": 0
+    },
+    "250": {
+      "text": "asd awdf aerfga ",
+      "duration": 0
+    },
+    "265": {
+      "text": "asdf asdf asdf ",
+      "duration": 4
+    }
+  }
+}
