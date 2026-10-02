@@ -34,6 +34,33 @@ def split_to_repeaters(total_ticks: int) -> List[int]:
     return result
 
 
+def find_structure_bottom(commands) -> int:
+    """返回命令集合中出现的最低 Y 坐标，用于把歌词链放到整个结构下方。
+
+    解析 setblock / fill 命令的 y 值；没有任何方块命令时返回 0。
+    """
+    min_y = None
+    for cmd in commands:
+        cmd = cmd.strip()
+        if cmd.startswith("setblock "):
+            parts = cmd.split()
+            try:
+                y = int(parts[2])
+            except (IndexError, ValueError):
+                continue
+        elif cmd.startswith("fill "):
+            parts = cmd.split()
+            try:
+                y = min(int(parts[2]), int(parts[5]))
+            except (IndexError, ValueError):
+                continue
+        else:
+            continue
+        if min_y is None or y < min_y:
+            min_y = y
+    return 0 if min_y is None else min_y
+
+
 # ── 乐器识别 ─────────────────────────────────────────────────
 
 def generate_fill_commands(

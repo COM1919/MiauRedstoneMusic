@@ -30,7 +30,8 @@ DEFAULT_CONFIG = {
     "lyrics_y_offset": 5,        # 歌词文字相对主轨道的高度（方块）
     "lyrics_side_offset": None,  # 歌词文字额外的侧向偏移
     "lyrics_follow": True,       # 文字是否随命令方块沿链条向前移动
-    "lyrics_import": {}          # 导入的歌词：{"tick": {"text": ..., "duration": ...}}
+    "lyrics_import": {},         # 导入的歌词：{"tick": {"text": ..., "duration": ...}}
+    "lyrics_chain_y_offset": 1   # 命令方块链相对结构最低方块向下的层数（默认紧贴结构底部下方）
 }
 
 def load_config() -> dict:

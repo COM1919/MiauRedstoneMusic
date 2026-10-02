@@ -102,7 +102,8 @@ def build_lyrics_commands(
     anchor_chain: int = None,
     anchor_y: int = None,
     origin_tick: int = None,
-    fixed_tick: int = None
+    fixed_tick: int = None,
+    chain_y: int = None
 ) -> List[str]:
     """生成歌词命令方块链。
 
@@ -114,12 +115,13 @@ def build_lyrics_commands(
     origin_tick：主链条的时间原点（全局第一个 tick），None 表示以歌词自身的第一个 tick 为原点。
     会在该 tick 处补一个空白事件格，使歌词链与音乐链的计时原点一致
     fixed_tick：文字不跟随时，取最接近该 tick 的事件格的链轴坐标作为固定位置
+    chain_y：命令方块链所在的红石层 Y；None 表示歌词轨道下方 3 格
     """
     dx, _, dz = DIR_OFFSET[direction]
     facing = OPPOSITE_FACING[direction]
     side_axis = SIDE_AXIS[direction]
     base_x, base_y, base_z = base
-    current_y = base_y - 3
+    current_y = chain_y if chain_y is not None else base_y - 3
     base_block = "minecraft:redstone_lamp" if use_lamp else "minecraft:white_wool"
     sorted_notes = sorted(lyrics_notes, key=lambda note: note.tick)
     mapping = {tick: (text, duration) for tick, text, duration in lyrics_mapping}
@@ -235,6 +237,130 @@ def build_lyrics_commands(
 
     return commands
 
+# ── 歌词轨道整体构建（供生成流程与测试复用）────────────────────
+
+def build_lyrics_track(
+    song_notes: List,
+    virtual_layers: List[dict],
+    layer_to_group: dict,
+    group_offset_dict: dict,
+    start: Tuple[int, int, int],
+    direction: str,
+    max_tick: int,
+    config: dict,
+    use_lamp: bool = False,
+    uniform_repeater_mode: bool = False,
+    struct_bottom_y: int = None
+):
+    """构建整条歌词命令方块轨道。
+
+    返回 (commands, activation_position, chain_y)；
+    未启用歌词或无法映射时返回 ([], None, None)。
+
+    相对位置约定（关键）：
+    - 命令方块链的纵向位置 = 整个结构最低方块 - config["lyrics_chain_y_offset"]，
+      默认 1，即紧贴整个结构下方（最不显眼处）；不再固定挂在歌词轨道下方 3 格。
+    - 文字显示坐标仍是结构上方的「绝对坐标」锚点，与命令方块链所在高度无关。
+    """
+    lyrics_track = config.get("lyrics_track")
+    imported_lyrics = config.get("lyrics_import") or {}
+    lyrics_text = config.get("lyrics_text", "")
+    if lyrics_track is None or not (imported_lyrics or lyrics_text):
+        return [], None, None
+
+    lyrics_notes = sorted([n for n in song_notes if n.layer == lyrics_track],
+                          key=lambda n: n.tick)
+    if not lyrics_notes:
+        print(Ansi.error("歌词轨道没有音符，跳过歌词生成"))
+        return [], None, None
+
+    lyr_vid = next((vl['vid'] for vl in virtual_layers if vl['original_id'] == lyrics_track), None)
+    if lyr_vid is None:
+        print(Ansi.error("歌词轨道未找到对应的虚拟层，跳过歌词生成"))
+        return [], None, None
+    lyr_gid = layer_to_group.get(lyr_vid)
+    if lyr_gid is None:
+        print(Ansi.error("歌词轨道未在任何分组中，跳过歌词生成"))
+        return [], None, None
+
+    start_x, start_y, start_z = start
+    dx, _, dz = DIR_OFFSET[direction]
+    side_axis = SIDE_AXIS[direction]
+
+    # 歌词链的链轴起点：与歌词轨道所在分组一致，纵向高度后面单独计算
+    lyr_y_off, lyr_side_off = group_offset_dict[lyr_gid]
+    lyr_base = (
+        start_x + (lyr_side_off if side_axis == "x" else 0),
+        start_y + lyr_y_off,
+        start_z + (lyr_side_off if side_axis == "z" else 0),
+    )
+
+    # 时间原点：与音乐链一致，取全局首个有效 tick
+    global_ticks = {n.tick for vl in virtual_layers
+                    for n in vl['notes'] if 0 <= n.tick <= max_tick}
+    if max_tick not in global_ticks:
+        global_ticks.add(max_tick)
+    origin_tick = min(global_ticks)
+
+    # 文字锚点：主轨道上方（非平铺用核心组，平铺用结构侧向中心）
+    style = config.get("layout_style", "flat")
+    master = config.get("master_group")
+    if style != "flat" and master is not None and master in group_offset_dict:
+        anchor_y_off, anchor_side_off = group_offset_dict[master]
+    else:
+        side_list = [off[1] for off in group_offset_dict.values()]
+        anchor_y_off = 0
+        anchor_side_off = (min(side_list) + max(side_list)) // 2
+    anchor_y = start_y + anchor_y_off + int(config.get("lyrics_y_offset", 5))
+    if side_axis == "z":
+        anchor_side = start_z + anchor_side_off
+    else:
+        anchor_side = start_x + anchor_side_off
+    follow = config.get("lyrics_follow", True)
+    fixed_tick = None if follow else origin_tick + (max_tick - origin_tick) // 2
+
+    # 命令方块链纵向位置：默认整个结构最低方块下方（相对结构计算）
+    if struct_bottom_y is None:
+        struct_bottom_y = min(start_y + off[0] for off in group_offset_dict.values()) - 2
+    raw_chain_off = config.get("lyrics_chain_y_offset", 1)
+    chain_offset = int(raw_chain_off) if raw_chain_off is not None else 1
+    chain_y = struct_bottom_y - chain_offset
+
+    if imported_lyrics:
+        lyrics_mapping = []
+        for tick_key, entry in imported_lyrics.items():
+            if not isinstance(entry, dict):
+                continue
+            try:
+                tick_value = int(tick_key)
+            except (TypeError, ValueError):
+                continue
+            lyrics_mapping.append((
+                tick_value,
+                entry.get("text", ""),
+                int(entry.get("duration") or 0)
+            ))
+        lyrics_mapping.sort(key=lambda item: item[0])
+        print(Ansi.info(f"使用导入的歌词，共 {len(lyrics_mapping)} 条"))
+    else:
+        lyrics_mapping = map_lyrics_to_notes(parse_lyrics(lyrics_text), lyrics_notes)
+
+    commands = build_lyrics_commands(
+        lyrics_notes, lyrics_mapping, lyr_base, direction, max_tick, config,
+        use_lamp=use_lamp,
+        uniform_repeater_mode=uniform_repeater_mode,
+        anchor_side=anchor_side,
+        anchor_chain=None,
+        anchor_y=anchor_y,
+        origin_tick=origin_tick,
+        fixed_tick=fixed_tick,
+        chain_y=chain_y,
+    )
+    # 歌词链启动点（红石块）：位于链条起手中继器后方两格
+    activation = (lyr_base[0] - 2 * dx, chain_y, lyr_base[2] - 2 * dz)
+    print(Ansi.success(f"歌词命令方块链已添加 ({len(commands)} 条命令)，链层 Y={chain_y}"))
+    return commands, activation, chain_y
+
 # ── 歌词设置 UI ──────────────────────────────────────────────
 
 def import_lyrics_json(config: dict):
@@ -334,6 +460,15 @@ def edit_lyrics_settings(config: dict):
             config["lyrics_side_offset"] = int(side_in)
         except ValueError:
             print(Ansi.error("侧向偏移必须是整数，未修改"))
+
+    chain_off = config.get("lyrics_chain_y_offset", 1)
+    print(Ansi.dim("命令方块链默认放在整个结构最底部（结构最低方块下方）。"))
+    chain_in = input(Ansi.prompt(f"命令方块链距结构底部的距离（正=更靠下，当前 {chain_off}）: ")).strip()
+    if chain_in:
+        try:
+            config["lyrics_chain_y_offset"] = int(chain_in)
+        except ValueError:
+            print(Ansi.error("距离必须是整数，未修改"))
 
     save_config(config)
 

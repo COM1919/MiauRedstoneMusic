@@ -41,7 +41,7 @@ from pynbs import read as nbs_read
 from pynbs import Layer
 
 from .config import load_config, save_config
-from .constants import Ansi, DIR_OFFSET, SIDE_AXIS
+from .constants import Ansi, DIR_OFFSET
 from .instruments import (
     analyze_track_instrument,
     auto_group_by_mode_on_layers,
@@ -49,8 +49,8 @@ from .instruments import (
     vertical_compress,
 )
 from .layout import calc_nest_layers, compute_min_radius, compute_offsets
-from .lyrics import build_lyrics_commands, edit_lyrics_settings, import_lyrics_json, map_lyrics_to_notes, parse_lyrics
-from .generation import build_all_commands_virtual, generate_schematic_from_commands
+from .lyrics import build_lyrics_track, edit_lyrics_settings, import_lyrics_json, parse_lyrics
+from .generation import build_all_commands_virtual, find_structure_bottom, generate_schematic_from_commands
 
 def edit_lyrics_track(song, config):
     """交互式选择歌词轨道"""
@@ -607,7 +607,7 @@ def main():
         print("[7] 设置分组生成模式（默认/阶梯向下）")
         print("[8] 设置歌词轨道")
         print("[9] 输入歌词文本")
-        print("[10] 歌词显示参数")
+        print("[10] 歌词显示与命令方块链位置")
         print("[11] 导入歌词 JSON")
         choice = input(Ansi.prompt("选择 (回车开始生成): ")).strip()
 
@@ -729,102 +729,17 @@ def main():
 
             # ─────────────────────────────────────────────────────────────
             # 歌词轨道链（先构建，便于把歌词链的启动点并入启动链）
-            lyrics_track = config.get("lyrics_track")
-            imported_lyrics = config.get("lyrics_import") or {}
-            lyrics_text = config.get("lyrics_text", "")
-            lyr_cmds = []
-            lyr_activation = None
-            if lyrics_track is not None and (imported_lyrics or lyrics_text):
+            # 命令方块链的纵向位置由 build_lyrics_track 按「整个结构最低方块」相对计算，
+            # 默认紧贴结构下方；文字显示坐标仍为结构上方的绝对锚点。
+            if config.get("lyrics_track") is not None and (config.get("lyrics_import") or config.get("lyrics_text")):
                 print(Ansi.info("正在处理歌词轨道..."))
-                # 获取歌词轨道音符
-                lyrics_notes = sorted([n for n in song.notes if n.layer == lyrics_track],
-                                      key=lambda n: n.tick)
-                if lyrics_notes:
-                    # 找到歌词轨道对应的虚拟层
-                    lyr_vid = None
-                    for vl in virtual_layers:
-                        if vl['original_id'] == lyrics_track:
-                            lyr_vid = vl['vid']
-                            break
-                    if lyr_vid is not None:
-                        lyr_gid = layer_to_group.get(lyr_vid)
-                        if lyr_gid is not None:
-                            lyr_y_off, lyr_side_off = group_offset_dict[lyr_gid]
-                            lyr_base = (
-                                start_x + (lyr_side_off if config["direction"] in ("north", "south") else 0),
-                                start_y + lyr_y_off,
-                                start_z + (lyr_side_off if config["direction"] in ("east", "west") else 0)
-                            )
-                            # 时间原点：与音乐链一致，取全局首个有效 tick
-                            global_ticks = {n.tick for vl in virtual_layers
-                                            for n in vl['notes'] if 0 <= n.tick <= max_tick}
-                            if max_tick not in global_ticks:
-                                global_ticks.add(max_tick)
-                            origin_tick = min(global_ticks)
-
-                            # 歌词文字锚点：主轨道上方（非平铺用核心组，平铺用结构侧向中心）
-                            side_axis = SIDE_AXIS[config["direction"]]
-                            style = config.get("layout_style", "flat")
-                            master = config.get("master_group")
-                            if style != "flat" and master is not None and master in group_offset_dict:
-                                anchor_y_off, anchor_side_off = group_offset_dict[master]
-                            else:
-                                side_list = [off[1] for off in group_offset_dict.values()]
-                                anchor_y_off = 0
-                                anchor_side_off = (min(side_list) + max(side_list)) // 2
-                            anchor_y = start_y + anchor_y_off + int(config.get("lyrics_y_offset", 5))
-                            follow = config.get("lyrics_follow", True)
-                            if side_axis == "z":
-                                anchor_side = start_z + anchor_side_off
-                            else:
-                                anchor_side = start_x + anchor_side_off
-                            # 不跟随时取最接近歌曲中段的事件格作为固定文字位置
-                            fixed_tick = None if follow else origin_tick + (max_tick - origin_tick) // 2
-
-                            if imported_lyrics:
-                                lyrics_mapping = []
-                                for tick_key, entry in imported_lyrics.items():
-                                    if not isinstance(entry, dict):
-                                        continue
-                                    try:
-                                        tick_value = int(tick_key)
-                                    except (TypeError, ValueError):
-                                        continue
-                                    lyrics_mapping.append((
-                                        tick_value,
-                                        entry.get("text", ""),
-                                        int(entry.get("duration") or 0)
-                                    ))
-                                lyrics_mapping.sort(key=lambda item: item[0])
-                                print(Ansi.info(f"使用导入的歌词，共 {len(lyrics_mapping)} 条"))
-                            else:
-                                segments = parse_lyrics(lyrics_text)
-                                lyrics_mapping = map_lyrics_to_notes(segments, lyrics_notes)
-
-                            lyr_cmds = build_lyrics_commands(
-                                lyrics_notes, lyrics_mapping, lyr_base,
-                                config["direction"], max_tick, config,
-                                use_lamp=use_lamp,
-                                uniform_repeater_mode=config.get("uniform_repeater_mode", False),
-                                anchor_side=anchor_side,
-                                anchor_chain=None,
-                                anchor_y=anchor_y,
-                                origin_tick=origin_tick,
-                                fixed_tick=fixed_tick
-                            )
-                            # 歌词链的启动点（红石块）：与音乐链同一起始 tick
-                            lyr_activation = (
-                                lyr_base[0] - 2 * dx,
-                                lyr_base[1] - 3,
-                                lyr_base[2] - 2 * dz
-                            )
-                            print(Ansi.success(f"歌词命令方块链已添加 ({len(lyr_cmds)} 条命令)"))
-                        else:
-                            print(Ansi.error("歌词轨道未在任何分组中，跳过歌词生成"))
-                    else:
-                        print(Ansi.error("歌词轨道未找到对应的虚拟层，跳过歌词生成"))
-                else:
-                    print(Ansi.error("歌词轨道没有音符，跳过歌词生成"))
+            lyr_cmds, lyr_activation, _lyr_chain_y = build_lyrics_track(
+                song.notes, virtual_layers, layer_to_group, group_offset_dict,
+                (start_x, start_y, start_z), config["direction"], max_tick, config,
+                use_lamp=use_lamp,
+                uniform_repeater_mode=config.get("uniform_repeater_mode", False),
+                struct_bottom_y=find_structure_bottom(commands),
+            )
             # ─────────────────────────────────────────────────────────────
 
             sorted_groups = sorted(activation_positions.items(), key=lambda x: x[0])
